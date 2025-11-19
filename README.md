@@ -32,18 +32,42 @@ Try our interactive demo from the Interspeech 2024 Tutorial:
 
 ## 📦 Installation
 
+### System Requirements
+
+- **Python**: 3.8 or higher
+- **PyTorch**: >= 2.6.0 (required for discrete_speech metrics due to CVE-2025-32434)
+  - For CUDA support: Install matching versions of `torch`, `torchaudio`, and `torchvision` with the same CUDA version
+  - Example for CUDA 12.4: `pip install torch>=2.6.0 torchaudio>=2.6.0 torchvision>=2.6.0 --index-url https://download.pytorch.org/whl/cu124`
+  - Example for CUDA 11.8: `pip install torch>=2.6.0 torchaudio>=2.6.0 torchvision>=2.6.0 --index-url https://download.pytorch.org/whl/cu118`
+  - For CPU-only: `pip install torch>=2.6.0 torchaudio>=2.6.0 torchvision>=2.6.0 --index-url https://download.pytorch.org/whl/cpu`
+
 ### Basic Installation
 
+**Step 1: Install PyTorch (if not already installed)**
 ```bash
-git clone https://github.com/wavlab-speech/versa.git
+# For CUDA 12.4 (recommended)
+pip install torch>=2.6.0 torchaudio>=2.6.0 torchvision>=2.6.0 --index-url https://download.pytorch.org/whl/cu124
+
+# OR for CUDA 11.8
+pip install torch>=2.6.0 torchaudio>=2.6.0 torchvision>=2.6.0 --index-url https://download.pytorch.org/whl/cu118
+
+# OR for CPU-only
+pip install torch>=2.6.0 torchaudio>=2.6.0 torchvision>=2.6.0 --index-url https://download.pytorch.org/whl/cpu
+```
+
+**Step 2: Clone and install VERSA**
+```bash
+git clone https://github.com/mmarkaki/versa.git
 cd versa
 pip install .
 ```
 
-or alternatively, without cloning: 
+**Alternative: Install without cloning**
 ```bash
-python -m pip install git+https://github.com/wavlab-speech/versa.git#egg=versa-speech-audio-toolkit --no-build-isolation
+# First install PyTorch (see Step 1 above), then:
+python -m pip install git+https://github.com/mmarkaki/versa.git#egg=versa-speech-audio-toolkit --no-build-isolation
 ```
+
 ### Metric-Specific Dependencies
 
 VERSA aligns with original APIs provided by algorithm developers rather than redistributing models. The core package includes many metrics by default, but some require additional installation.
