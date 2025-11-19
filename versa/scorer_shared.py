@@ -253,8 +253,7 @@ def load_score_modules(score_config, use_gt=True, use_gt_text=False, use_gpu=Fal
                 from versa import speaker_metric, speaker_model_setup
             except (ImportError, OSError, RuntimeError) as e:
                 logging.error(
-                    f"Failed to load speaker metrics: {e}. "
-                    "Skipping speaker metrics."
+                    f"Failed to load speaker metrics: {e}. " "Skipping speaker metrics."
                 )
                 continue
 
@@ -521,8 +520,7 @@ def load_score_modules(score_config, use_gt=True, use_gt_text=False, use_gpu=Fal
                 from versa import se_snr, se_snr_setup
             except (ImportError, OSError, RuntimeError) as e:
                 logging.error(
-                    f"Failed to load se_snr metrics: {e}. "
-                    "Skipping se_snr metrics."
+                    f"Failed to load se_snr metrics: {e}. " "Skipping se_snr metrics."
                 )
                 continue
 

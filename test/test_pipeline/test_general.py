@@ -90,7 +90,7 @@ def info_update():
                 f"Value: {summary[key]}"
             )
             continue
-        
+
         if math.isinf(TEST_INFO[key]) and math.isinf(summary[key]):
             # for sir"
             continue

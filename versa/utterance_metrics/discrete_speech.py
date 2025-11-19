@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 def _check_torch_version():
     """Check if torch version is compatible with transformers library.
-    
+
     Due to CVE-2025-32434, transformers requires torch >= 2.6 when loading
     models that use torch.load(). This check provides a clear error message
     if the version is too old.
@@ -31,7 +31,7 @@ def _check_torch_version():
         version_parts = torch_version.split(".")
         major = int(version_parts[0])
         minor = int(version_parts[1]) if len(version_parts) > 1 else 0
-        
+
         # Require torch 2.6+ for CVE-2025-32434 compliance
         if major < 2 or (major == 2 and minor < 6):
             raise ValueError(
@@ -53,10 +53,14 @@ def _check_torch_version():
 def _import_discrete_speech_metrics():
     """Lazy import of discrete_speech_metrics to avoid import-time errors."""
     global SpeechBERTScore, SpeechBLEU, SpeechTokenDistance
-    
+
     if SpeechBERTScore is None:
         try:
-            from discrete_speech_metrics import SpeechBERTScore, SpeechBLEU, SpeechTokenDistance
+            from discrete_speech_metrics import (
+                SpeechBERTScore,
+                SpeechBLEU,
+                SpeechTokenDistance,
+            )
         except ImportError as e:
             raise ImportError("Please install discrete_speech_metrics and retry") from e
         except OSError as e:
@@ -77,7 +81,7 @@ def discrete_speech_setup(use_gpu=False):
 
     Returns:
         dict: Dictionary containing the initialized metrics.
-    
+
     Raises:
         ValueError: If torch version is too old (< 2.6) due to CVE-2025-32434.
         ImportError: If discrete_speech_metrics cannot be imported.
@@ -85,10 +89,10 @@ def discrete_speech_setup(use_gpu=False):
     """
     # Check torch version before attempting to load models
     _check_torch_version()
-    
+
     # Lazy import to avoid import-time errors
     _import_discrete_speech_metrics()
-    
+
     # NOTE(jiatong) existing discrete speech metrics only works for 16khz
     # We keep the paper best setting. To use other settings, please conduct the
     # test on your own.

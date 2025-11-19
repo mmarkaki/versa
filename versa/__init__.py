@@ -55,7 +55,10 @@ except ImportError:
     )
 
 try:
-    from versa.corpus_metrics.espnet_wer import espnet_levenshtein_metric, espnet_wer_setup
+    from versa.corpus_metrics.espnet_wer import (
+        espnet_levenshtein_metric,
+        espnet_wer_setup,
+    )
 except (ImportError, OSError, RuntimeError) as e:
     logging.info(
         f"Could not load espnet_wer metrics: {e}. "
@@ -65,6 +68,7 @@ except (ImportError, OSError, RuntimeError) as e:
     espnet_levenshtein_metric = None
     espnet_wer_setup = None
 from versa.corpus_metrics.fad import fad_scoring, fad_setup
+
 try:
     from versa.corpus_metrics.owsm_wer import owsm_levenshtein_metric, owsm_wer_setup
 except (ImportError, OSError, RuntimeError) as e:
@@ -78,6 +82,7 @@ from versa.corpus_metrics.whisper_wer import (
     whisper_levenshtein_metric,
     whisper_wer_setup,
 )
+
 try:
     from versa.utterance_metrics.asr_matching import asr_match_metric, asr_match_setup
 except (ImportError, OSError, RuntimeError) as e:
@@ -94,6 +99,7 @@ from versa.utterance_metrics.audiobox_aesthetics_score import (
 from versa.utterance_metrics.emotion import emo2vec_setup, emo_sim
 from versa.utterance_metrics.nomad import nomad, nomad_setup
 from versa.utterance_metrics.noresqa import noresqa_metric, noresqa_model_setup
+
 try:
     from versa.utterance_metrics.owsm_lid import language_id, owsm_lid_model_setup
 except (ImportError, OSError, RuntimeError) as e:
@@ -139,6 +145,7 @@ from versa.utterance_metrics.scoreq import (
     scoreq_ref,
     scoreq_ref_setup,
 )
+
 try:
     from versa.utterance_metrics.se_snr import se_snr, se_snr_setup
 except (ImportError, OSError, RuntimeError) as e:
@@ -149,6 +156,7 @@ except (ImportError, OSError, RuntimeError) as e:
     se_snr = None
     se_snr_setup = None
 from versa.utterance_metrics.sheet_ssqa import sheet_ssqa, sheet_ssqa_setup
+
 try:
     from versa.utterance_metrics.speaking_rate import (
         speaking_rate_metric,
