@@ -40,23 +40,33 @@ TEST_INFO = {
     "torch_squim_stoi": 0.6027805209159851,
     "torch_squim_pesq": 1.1683127880096436,
     "torch_squim_si_sdr": -11.109052658081055,
+    "dnsmos_pro_bvcc": 1.1717286109924316,
+    "dnsmos_pro_nisqa": 1.4733697175979614,
+    "dnsmos_pro_vcc2018": 1.9309351444244385,
+    "dpam_distance": 0.15004247426986694,
+    "cdpam_distance": 0.05146127939224243,
 }
 
 
 def info_update():
 
     # find files
+    gen_files = None
     if os.path.isdir("test/test_samples/test2"):
         gen_files = find_files("test/test_samples/test2")
 
     # find reference file
+    gt_files = None
     if os.path.isdir("test/test_samples/test1"):
         gt_files = find_files("test/test_samples/test1")
+
+    if gen_files is None:
+        raise FileNotFoundError("test/test_samples/test2 directory not found")
 
     logging.info("The number of utterances = %d" % len(gen_files))
 
     with open("egs/speech.yaml", "r", encoding="utf-8") as f:
-        score_config = yaml.full_load(f)
+        score_config = yaml.safe_load(f)
 
     score_modules = load_score_modules(
         score_config,
@@ -73,6 +83,14 @@ def info_update():
     print("Summary: {}".format(load_summary(score_info)), flush=True)
 
     for key in summary:
+        # Skip keys that are not in TEST_INFO (new metrics or optional metrics)
+        if key not in TEST_INFO:
+            logging.warning(
+                f"Metric {key} not in TEST_INFO, skipping validation. "
+                f"Value: {summary[key]}"
+            )
+            continue
+        
         if math.isinf(TEST_INFO[key]) and math.isinf(summary[key]):
             # for sir"
             continue

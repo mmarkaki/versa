@@ -121,32 +121,63 @@ def load_score_modules(score_config, use_gt=True, use_gt_text=False, use_gpu=Fal
                 continue
 
             logging.info("Loading discrete speech evaluation...")
-            from versa import discrete_speech_metric, discrete_speech_setup
+            try:
+                from versa import discrete_speech_metric, discrete_speech_setup
+            except (ImportError, OSError, ValueError, RuntimeError) as e:
+                logging.error(
+                    f"Failed to load discrete_speech metrics: {e}. "
+                    "This may be due to missing dependencies or incompatible torch/torchaudio versions. "
+                    "Skipping discrete_speech metrics."
+                )
+                continue
 
-            score_modules["discrete_speech"] = {
-                "module": discrete_speech_metric,
-                "model": discrete_speech_setup(use_gpu=use_gpu),
-            }
-            logging.info("Initiate discrete speech evaluation successfully.")
+            try:
+                score_modules["discrete_speech"] = {
+                    "module": discrete_speech_metric,
+                    "model": discrete_speech_setup(use_gpu=use_gpu),
+                }
+                logging.info("Initiate discrete speech evaluation successfully.")
+            except (ValueError, OSError, ImportError, RuntimeError) as e:
+                logging.error(
+                    f"Failed to initialize discrete_speech metrics: {e}. "
+                    "This may be due to torch version < 2.6 (CVE-2025-32434) or "
+                    "incompatible torch/torchaudio versions. Skipping discrete_speech metrics."
+                )
+                continue
 
         elif config["name"] == "pseudo_mos":
             logging.info("Loading pseudo MOS evaluation...")
-            from versa import pseudo_mos_metric, pseudo_mos_setup
+            try:
+                from versa import pseudo_mos_metric, pseudo_mos_setup
+            except (ImportError, OSError, RuntimeError) as e:
+                logging.error(
+                    f"Failed to load pseudo_mos metrics: {e}. "
+                    "Skipping pseudo_mos metrics."
+                )
+                continue
 
-            predictor_dict, predictor_fs = pseudo_mos_setup(
-                use_gpu=use_gpu,
-                predictor_types=config.get("predictor_types", ["utmos"]),
-                predictor_args=config.get("predictor_args", {}),
-            )
-            score_modules["pseudo_mos"] = {
-                "module": pseudo_mos_metric,
-                "args": {
-                    "predictor_dict": predictor_dict,
-                    "predictor_fs": predictor_fs,
-                    "use_gpu": use_gpu,
-                },
-            }
-            logging.info("Initiate pseudo MOS evaluation successfully.")
+            try:
+                predictor_dict, predictor_fs = pseudo_mos_setup(
+                    use_gpu=use_gpu,
+                    predictor_types=config.get("predictor_types", ["utmos"]),
+                    predictor_args=config.get("predictor_args", {}),
+                )
+                score_modules["pseudo_mos"] = {
+                    "module": pseudo_mos_metric,
+                    "args": {
+                        "predictor_dict": predictor_dict,
+                        "predictor_fs": predictor_fs,
+                        "use_gpu": use_gpu,
+                    },
+                }
+                logging.info("Initiate pseudo MOS evaluation successfully.")
+            except (RuntimeError, OSError, ImportError, ValueError) as e:
+                logging.error(
+                    f"Failed to initialize pseudo_mos metrics: {e}. "
+                    "This may be due to incompatible torch/torchaudio versions. "
+                    "Skipping pseudo_mos metrics."
+                )
+                continue
 
         elif config["name"] == "pesq":
             if not use_gt:
@@ -218,19 +249,42 @@ def load_score_modules(score_config, use_gt=True, use_gt_text=False, use_gpu=Fal
                 continue
 
             logging.info("Loading speaker evaluation...")
-            from versa import speaker_metric, speaker_model_setup
+            try:
+                from versa import speaker_metric, speaker_model_setup
+            except (ImportError, OSError, RuntimeError) as e:
+                logging.error(
+                    f"Failed to load speaker metrics: {e}. "
+                    "Skipping speaker metrics."
+                )
+                continue
 
-            spk_model = speaker_model_setup(
-                model_tag=config.get("model_tag", "default"),
-                model_path=config.get("model_path", None),
-                model_config=config.get("model_config", None),
-                use_gpu=use_gpu,
-            )
-            score_modules["speaker"] = {
-                "module": speaker_metric,
-                "args": {"model": spk_model},
-            }
-            logging.info("Initiate speaker evaluation successfully.")
+            if speaker_metric is None or speaker_model_setup is None:
+                logging.error(
+                    "Speaker metrics are not available. "
+                    "This may be due to missing dependencies or incompatible torch/torchaudio versions. "
+                    "Skipping speaker metrics."
+                )
+                continue
+
+            try:
+                spk_model = speaker_model_setup(
+                    model_tag=config.get("model_tag", "default"),
+                    model_path=config.get("model_path", None),
+                    model_config=config.get("model_config", None),
+                    use_gpu=use_gpu,
+                )
+                score_modules["speaker"] = {
+                    "module": speaker_metric,
+                    "args": {"model": spk_model},
+                }
+                logging.info("Initiate speaker evaluation successfully.")
+            except (RuntimeError, OSError, ImportError, ValueError) as e:
+                logging.error(
+                    f"Failed to initialize speaker metrics: {e}. "
+                    "This may be due to incompatible torch/torchaudio versions. "
+                    "Skipping speaker metrics."
+                )
+                continue
 
         elif config["name"] == "singer":
             if not use_gt:
@@ -257,19 +311,34 @@ def load_score_modules(score_config, use_gt=True, use_gt_text=False, use_gpu=Fal
 
         elif config["name"] == "sheet_ssqa":
             logging.info("Loading Sheet SSQA models for evaluation...")
-            from versa import sheet_ssqa, sheet_ssqa_setup
+            try:
+                from versa import sheet_ssqa, sheet_ssqa_setup
+            except (ImportError, OSError, RuntimeError) as e:
+                logging.error(
+                    f"Failed to load sheet_ssqa metrics: {e}. "
+                    "Skipping sheet_ssqa metrics."
+                )
+                continue
 
-            sheet_model = sheet_ssqa_setup(
-                model_tag=config.get("model_tag", "default"),
-                model_path=config.get("model_path", None),
-                model_config=config.get("model_config", None),
-                use_gpu=use_gpu,
-            )
-            score_modules["sheet_ssqa"] = {
-                "module": sheet_ssqa,
-                "args": {"model": sheet_model, "use_gpu": use_gpu},
-            }
-            logging.info("Initiate Sheet SSQA evaluation successfully.")
+            try:
+                sheet_model = sheet_ssqa_setup(
+                    model_tag=config.get("model_tag", "default"),
+                    model_path=config.get("model_path", None),
+                    model_config=config.get("model_config", None),
+                    use_gpu=use_gpu,
+                )
+                score_modules["sheet_ssqa"] = {
+                    "module": sheet_ssqa,
+                    "args": {"model": sheet_model, "use_gpu": use_gpu},
+                }
+                logging.info("Initiate Sheet SSQA evaluation successfully.")
+            except (RuntimeError, OSError, ImportError, ValueError) as e:
+                logging.error(
+                    f"Failed to initialize sheet_ssqa metrics: {e}. "
+                    "This may be due to incompatible torch/torchaudio versions. "
+                    "Skipping sheet_ssqa metrics."
+                )
+                continue
 
         elif config["name"] == "squim_ref":
             if not use_gt:
@@ -448,19 +517,42 @@ def load_score_modules(score_config, use_gt=True, use_gt_text=False, use_gpu=Fal
 
         elif config["name"] == "se_snr":
             logging.info("Loading se_snr metrics with reference")
-            from versa import se_snr, se_snr_setup
+            try:
+                from versa import se_snr, se_snr_setup
+            except (ImportError, OSError, RuntimeError) as e:
+                logging.error(
+                    f"Failed to load se_snr metrics: {e}. "
+                    "Skipping se_snr metrics."
+                )
+                continue
 
-            model = se_snr_setup(
-                model_tag=config.get("model_tag", "default"),
-                model_path=config.get("model_path", None),
-                use_gpu=use_gpu,
-            )
+            if se_snr is None or se_snr_setup is None:
+                logging.error(
+                    "se_snr metrics are not available. "
+                    "This may be due to missing dependencies or incompatible torch/torchaudio versions. "
+                    "Skipping se_snr metrics."
+                )
+                continue
 
-            score_modules["se_snr"] = {
-                "module": se_snr,
-                "model": model,
-            }
-            logging.info("Initiate se_snr successfully")
+            try:
+                model = se_snr_setup(
+                    model_tag=config.get("model_tag", "default"),
+                    model_path=config.get("model_path", None),
+                    use_gpu=use_gpu,
+                )
+
+                score_modules["se_snr"] = {
+                    "module": se_snr,
+                    "model": model,
+                }
+                logging.info("Initiate se_snr successfully")
+            except (RuntimeError, OSError, ImportError, ValueError) as e:
+                logging.error(
+                    f"Failed to initialize se_snr metrics: {e}. "
+                    "This may be due to incompatible torch/torchaudio versions. "
+                    "Skipping se_snr metrics."
+                )
+                continue
 
         elif config["name"] == "pam":
             logging.info("Loading pam metric without reference...")

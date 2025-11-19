@@ -14,9 +14,10 @@ except ImportError:
     logging.info(
         "Please pip install git+https://github.com/ftshijt/DiscreteSpeechMetrics.git and retry"
     )
-except RuntimeError:
+except (RuntimeError, OSError, ValueError) as e:
     logging.info(
-        "Issues detected in discrete speech metrics, please double check the environment."
+        f"Issues detected in discrete speech metrics: {e}. "
+        "Please double check the environment, especially torch/torchaudio compatibility."
     )
 
 from versa.utterance_metrics.pseudo_mos import pseudo_mos_metric, pseudo_mos_setup
@@ -33,8 +34,13 @@ except ImportError:
 
 try:
     from versa.utterance_metrics.speaker import speaker_metric, speaker_model_setup
-except ImportError:
-    logging.info("Please install espnet with `pip install espnet` and retry")
+except (ImportError, OSError, RuntimeError) as e:
+    logging.info(
+        f"Could not load speaker metrics: {e}. "
+        "Please install espnet with `pip install espnet` and ensure torch/torchaudio versions are compatible."
+    )
+    speaker_metric = None
+    speaker_model_setup = None
 
 try:
     from versa.utterance_metrics.singer import singer_metric, singer_model_setup
@@ -48,14 +54,39 @@ except ImportError:
         "Please install visqol follow https://github.com/google/visqol and retry"
     )
 
-from versa.corpus_metrics.espnet_wer import espnet_levenshtein_metric, espnet_wer_setup
+try:
+    from versa.corpus_metrics.espnet_wer import espnet_levenshtein_metric, espnet_wer_setup
+except (ImportError, OSError, RuntimeError) as e:
+    logging.info(
+        f"Could not load espnet_wer metrics: {e}. "
+        "Please install espnet and ensure torch/torchaudio versions are compatible."
+    )
+    # Set to None to avoid NameError if these are used elsewhere
+    espnet_levenshtein_metric = None
+    espnet_wer_setup = None
 from versa.corpus_metrics.fad import fad_scoring, fad_setup
-from versa.corpus_metrics.owsm_wer import owsm_levenshtein_metric, owsm_wer_setup
+try:
+    from versa.corpus_metrics.owsm_wer import owsm_levenshtein_metric, owsm_wer_setup
+except (ImportError, OSError, RuntimeError) as e:
+    logging.info(
+        f"Could not load owsm_wer metrics: {e}. "
+        "Please install espnet and ensure torch/torchaudio versions are compatible."
+    )
+    owsm_levenshtein_metric = None
+    owsm_wer_setup = None
 from versa.corpus_metrics.whisper_wer import (
     whisper_levenshtein_metric,
     whisper_wer_setup,
 )
-from versa.utterance_metrics.asr_matching import asr_match_metric, asr_match_setup
+try:
+    from versa.utterance_metrics.asr_matching import asr_match_metric, asr_match_setup
+except (ImportError, OSError, RuntimeError) as e:
+    logging.info(
+        f"Could not load asr_matching metrics: {e}. "
+        "Please install espnet and ensure torch/torchaudio versions are compatible."
+    )
+    asr_match_metric = None
+    asr_match_setup = None
 from versa.utterance_metrics.audiobox_aesthetics_score import (
     audiobox_aesthetics_score,
     audiobox_aesthetics_setup,
@@ -63,7 +94,15 @@ from versa.utterance_metrics.audiobox_aesthetics_score import (
 from versa.utterance_metrics.emotion import emo2vec_setup, emo_sim
 from versa.utterance_metrics.nomad import nomad, nomad_setup
 from versa.utterance_metrics.noresqa import noresqa_metric, noresqa_model_setup
-from versa.utterance_metrics.owsm_lid import language_id, owsm_lid_model_setup
+try:
+    from versa.utterance_metrics.owsm_lid import language_id, owsm_lid_model_setup
+except (ImportError, OSError, RuntimeError) as e:
+    logging.info(
+        f"Could not load owsm_lid metrics: {e}. "
+        "Please install espnet and ensure torch/torchaudio versions are compatible."
+    )
+    language_id = None
+    owsm_lid_model_setup = None
 from versa.utterance_metrics.pysepm import pysepm_metric
 from versa.utterance_metrics.qwen2_audio import (
     qwen2_channel_type_metric,
@@ -100,13 +139,37 @@ from versa.utterance_metrics.scoreq import (
     scoreq_ref,
     scoreq_ref_setup,
 )
-from versa.utterance_metrics.se_snr import se_snr, se_snr_setup
+try:
+    from versa.utterance_metrics.se_snr import se_snr, se_snr_setup
+except (ImportError, OSError, RuntimeError) as e:
+    logging.info(
+        f"Could not load se_snr metrics: {e}. "
+        "Please install espnet and ensure torch/torchaudio versions are compatible."
+    )
+    se_snr = None
+    se_snr_setup = None
 from versa.utterance_metrics.sheet_ssqa import sheet_ssqa, sheet_ssqa_setup
-from versa.utterance_metrics.speaking_rate import (
-    speaking_rate_metric,
-    speaking_rate_model_setup,
-)
-from versa.utterance_metrics.squim import squim_metric, squim_metric_no_ref
+try:
+    from versa.utterance_metrics.speaking_rate import (
+        speaking_rate_metric,
+        speaking_rate_model_setup,
+    )
+except (ImportError, OSError, RuntimeError) as e:
+    logging.info(
+        f"Could not load speaking_rate metrics: {e}. "
+        "Please install espnet and ensure torch/torchaudio versions are compatible."
+    )
+    speaking_rate_metric = None
+    speaking_rate_model_setup = None
+try:
+    from versa.utterance_metrics.squim import squim_metric, squim_metric_no_ref
+except (ImportError, OSError, RuntimeError) as e:
+    logging.info(
+        f"Could not load squim metrics: {e}. "
+        "Please ensure torch/torchaudio versions are compatible."
+    )
+    squim_metric = None
+    squim_metric_no_ref = None
 from versa.utterance_metrics.srmr import srmr_metric
 from versa.utterance_metrics.chroma_alignment import chroma_metric
 from versa.utterance_metrics.wvmos import wvmos_setup, wvmos_calculate
