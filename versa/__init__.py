@@ -1,5 +1,19 @@
 import logging
 
+# Workaround for torchaudio.set_audio_backend compatibility
+# Some dependencies (e.g., espnet) may call set_audio_backend which was removed in newer torchaudio
+try:
+    import torchaudio
+
+    if not hasattr(torchaudio, "set_audio_backend"):
+        # Add a no-op function for compatibility
+        def _noop_set_audio_backend(*args, **kwargs):
+            pass
+
+        torchaudio.set_audio_backend = _noop_set_audio_backend
+except ImportError:
+    pass
+
 __version__ = "0.0.1"  # noqa: F401
 
 from versa.sequence_metrics.mcd_f0 import mcd_f0
