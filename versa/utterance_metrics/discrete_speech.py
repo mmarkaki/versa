@@ -32,12 +32,14 @@ def _check_torch_version():
         major = int(version_parts[0])
         minor = int(version_parts[1]) if len(version_parts) > 1 else 0
         
+        # Require torch 2.6+ for CVE-2025-32434 compliance
         if major < 2 or (major == 2 and minor < 6):
             raise ValueError(
                 f"torch version {torch.__version__} is too old. "
                 "Due to CVE-2025-32434 (torch.load vulnerability), "
                 "transformers requires torch >= 2.6 to load models. "
-                "Please upgrade torch: pip install 'torch>=2.6'"
+                "Please upgrade torch: pip install 'torch>=2.6' "
+                "(Note: torch 2.6.0 is available for CUDA 12.4 or CUDA 11.8)"
             )
     except (IndexError, ValueError) as e:
         # If version parsing fails (IndexError), let transformers handle the error
